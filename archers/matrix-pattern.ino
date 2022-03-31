@@ -1,3 +1,4 @@
+//EVERY_N_MILLISECONDS(100)
 
 void MatrixWrapper(int loopCounter){
    if (loopCounter == 1) {

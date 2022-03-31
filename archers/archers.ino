@@ -19,7 +19,7 @@ void setup() {
   LEDS.addLeds<NEOPIXEL, NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
   LEDS.setBrightness(210);
   // limit my draw to 50A at 5v of power draw
-  FastLED.setMaxPowerInVoltsAndMilliamps(5,50000); 
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, 50000);
   Serial.setTimeout(50);
   Serial.flush();
   while ( Serial.available() ) Serial.read();
@@ -31,7 +31,7 @@ void loop() {
     SequenceSchedule();
     loopCounter = loopCounter + 1;
   }
-  
+
   int startChar = Serial.read();
   SerialRead(startChar);
 }
@@ -48,14 +48,20 @@ void SequenceSchedule() {
       }
       break;
     case 2:
-      ColorWipeRainSequenceWrapper();
-      break;
+      if (loopCounter > 1000) {
+        ColorWipeRainSequenceWrapper();
+        break;
+      }
     case 3:
-      PacificaSequenceWrapper();
-      break;
+      if (loopCounter > 1000) {
+        MatrixWrapper();
+        break;
+      }
     case 4:
-      PacificaSequenceWrapper();
-      break;
+      if (loopCounter > 1000) {
+        MatrixWrapper();
+        break;
+      }
     default:
       sequence = 1;
       loopCounter = 0;
