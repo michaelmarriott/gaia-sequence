@@ -3,8 +3,9 @@
 //GLOBAL VARIBALES
 #define NUM_LEDS_PER_STRIP 1300
 #define NUM_STRIPS 8
+#define NUM_LEDS NUM_LEDS_PER_STRIP * NUM_STRIPS
 
-struct CRGB leds[NUM_STRIPS * NUM_LEDS_PER_STRIP];
+struct CRGB leds[NUM_LEDS];
 
 int sequence = 1; // What sequence to start playing?
 int loopCounter = 0; // ALWAYS RESET TO 0 WHEN SEQUENCE CHANGES
@@ -17,6 +18,8 @@ void setup() {
   delay(100);//Safe Gaurd
   LEDS.addLeds<NEOPIXEL, NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
   LEDS.setBrightness(210);
+  // limit my draw to 50A at 5v of power draw
+  FastLED.setMaxPowerInVoltsAndMilliamps(5,50000); 
   Serial.setTimeout(50);
   Serial.flush();
   while ( Serial.available() ) Serial.read();
@@ -24,10 +27,11 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  EVERY_N_MILLIS_I(loopDealy, beginDelay) {
+  EVERY_N_MILLIS_I(loopDelay, beginDelay) {
     SequenceSchedule();
     loopCounter = loopCounter + 1;
   }
+  
   int startChar = Serial.read();
   SerialRead(startChar);
 }
@@ -45,6 +49,12 @@ void SequenceSchedule() {
       break;
     case 2:
       ColorWipeRainSequenceWrapper();
+      break;
+    case 3:
+      PacificaSequenceWrapper();
+      break;
+    case 4:
+      PacificaSequenceWrapper();
       break;
     default:
       sequence = 1;
