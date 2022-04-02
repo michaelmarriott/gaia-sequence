@@ -1,25 +1,28 @@
 #include "FastLED.h" // FastLED library.
 
 //GLOBAL VARIBALES
-#define NUM_LEDS_PER_STRIP 1300
+#define NUM_LEDS_PER_STRIP 450
 #define NUM_STRIPS 8
 #define NUM_LEDS NUM_LEDS_PER_STRIP * NUM_STRIPS
 
 struct CRGB leds[NUM_LEDS];
+CRGB listOfColors[14]; //List of predefined colors
 
 int sequence = 1; // What sequence to start playing?
 int loopCounter = 0; // ALWAYS RESET TO 0 WHEN SEQUENCE CHANGES
 bool isStarted = true;
 int beginDelay = 200;
 int loopDelay = 100;
+int BRIGHTNESS = 210;
 
 void setup() {
-  // put your setup code here, to run once:
   delay(100);//Safe Gaurd
-  LEDS.addLeds<NEOPIXEL, NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
-  LEDS.setBrightness(210);
-  // limit my draw to 50A at 5v of power draw
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, 50000);
+   
+  // put your setup code here, to run once:
+  LEDS.addLeds<WS2811_PORTD, NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
+  LEDS.setBrightness(BRIGHTNESS);
+  SetListOfColors(listOfColors);
+  FastLED.setMaxPowerInVoltsAndMilliamps(5,60000);
   Serial.setTimeout(50);
   Serial.flush();
   while ( Serial.available() ) Serial.read();
@@ -27,9 +30,10 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  EVERY_N_MILLIS_I(loopDelay, beginDelay) {
+  EVERY_N_MILLIS_I(thisTimer,beginDelay) {
+    thisTimer.setPeriod(loopDelay);   
     SequenceSchedule();
-    loopCounter = loopCounter + 1;
+    loopCounter += 1;
   }
 
   int startChar = Serial.read();
@@ -38,35 +42,46 @@ void loop() {
 
 // Sequence schedule
 void SequenceSchedule() {
+  Serial.print("-sequence:");
+  Serial.print(sequence);
+  Serial.print("-loopCounter:");
+  Serial.println(loopCounter);
   switch (sequence) {
     case 1:
       // SEQUENCE
-      if (loopCounter > 10000) {
-        sequence = sequence + 1;
-        loopCounter = 0;
-        OscialateComplexSequenceWrapper(loopCounter);
+      OscialateComplexSequenceWrapper(loopCounter);
+      if (loopCounter > 1000) {
+        nextSequence();
       }
       break;
     case 2:
+      ColorWipeRainSequenceWrapper();
       if (loopCounter > 1000) {
-        ColorWipeRainSequenceWrapper();
-        break;
+        nextSequence();
       }
+      break;
     case 3:
+      MatrixWrapper(loopCounter);
       if (loopCounter > 1000) {
-        MatrixWrapper();
-        break;
+        nextSequence();
       }
+      break;
     case 4:
+      PacificaSequenceWrapper();
       if (loopCounter > 1000) {
-        MatrixWrapper();
-        break;
+        nextSequence();
       }
+      break;
     default:
       sequence = 1;
       loopCounter = 0;
       break;
   }
+}
+
+void nextSequence(){
+    sequence += 1;
+    loopCounter = 0;
 }
 
 // Listen to incoming commands to sync
@@ -80,7 +95,8 @@ void SerialRead(int startChar) {
         sequence = cmndValue;
         break;
       case 'B':
-        LEDS.setBrightness(cmndValue);
+        BRIGHTNESS = cmndValue;
+        LEDS.setBrightness(BRIGHTNESS);
         break;
       case 'D':
         loopDelay = cmndValue;
@@ -102,7 +118,7 @@ void SerialRead(int startChar) {
 }
 
 int ChangeColorNumber = 0;
-CRGB listOfColors[14]; //List of predefined colors
+
 
 CRGB RandomColor(uint8_t minR, uint8_t maxR, uint8_t minG, uint8_t maxG , uint8_t minB , uint8_t maxB) {
   CRGB randomColor = CRGB(random8(minR, maxR), random8(minG, maxG), random8(minB, maxB));

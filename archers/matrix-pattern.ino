@@ -1,14 +1,21 @@
-//EVERY_N_MILLISECONDS(100)
 
-void MatrixWrapper(int loopCounter){
-   if (loopCounter == 1) {
+byte matrix_rain[NUM_LEDS];
+int matrix_speed = 10;
+int matrix_hue = random8(0, 255);
+int matrix_sat =  random8(110, 220);
+CHSV matrix_color =  CHSV(matrix_hue, matrix_sat, BRIGHTNESS);
+
+void MatrixWrapper(int loopCounter) {
+  if (loopCounter <= 1) {
+    Serial.println("MatrixInit");
     MatrixInit();
-   }
-   MatrixUpdate();
-   FastLED.show();
-   MatrixChange();
+  }
+   Serial.println("MatrixUpdate");
+  MatrixUpdate();
+  FastLED.show();
+  Serial.println("MatrixChange");
+  MatrixChange();
 }
-
 void MatrixChange () {
   matrix_hue = Increment(matrix_hue, 0, 255, 1);
   matrix_sat = Increment(matrix_sat, 100, 220, 1);
@@ -37,23 +44,22 @@ void MatrixInit() {
 
 void MatrixUpdate() {
 
-  for (byte i = 0; i < NUM_COLS; i++) {
 
-    for (byte j = 0; j < NUM_ROWS; j++) {
-      byte layer = matrix_rain[XY(i, ((j + matrix_speed + random8(3) + NUM_ROWS) % NUM_ROWS))];
-      //fake scroll based on shift coordinate
-      // random8(2) // add glitchy look
+ for (byte i = 0; i < NUM_LEDS_PER_STRIP; i++) {
+    for (byte j = 0; j < NUM_STRIPS; j++) {
+      byte layer = matrix_rain[XY( ((i + matrix_speed + random8(2) + NUM_LEDS_PER_STRIP) % NUM_LEDS_PER_STRIP),j)];   //fake scroll based on shift coordinate
+      // random8(2) add glitchy look
       if (layer) {
-        leds[XY((NUM_COLS - 1) - i, (NUM_ROWS - 1) - j)] = matrix_color;
+        leds[XY((NUM_LEDS_PER_STRIP - 1) - i, (NUM_STRIPS - 1) - j)] = matrix_color;
       }
     }
   }
 
   matrix_speed ++;
   fadeToBlackBy(leds, NUM_LEDS, 40);
-  blurRows(leds, NUM_COLS, NUM_ROWS, 16);      //if you want
+ //blurRows(leds,NUM_LEDS_PER_STRIP,  NUM_STRIPS, 16);      //if you want
 } 
 
 uint16_t XY (uint8_t x, uint8_t y) {
-  return (y * NUM_COLS + x);
+  return (y * NUM_LEDS_PER_STRIP + x);
 }
