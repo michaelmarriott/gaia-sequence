@@ -19,7 +19,7 @@ void FireballsWrapper(){
       sum = qadd8(sum, dist(i, j, bx4, by4));
       sum = qadd8(sum, dist(i, j, bx5, by5));
 
-      leds[XY (i, j)] =  ColorFromPalette(HeatColors_p, sum + 220, BRIGHTNESS);
+      leds[XYs(i, j)] =  ColorFromPalette(HeatColors_p, sum + 220, BRIGHTNESS);
     }
   }
 

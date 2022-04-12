@@ -8,11 +8,11 @@
 struct CRGB leds[NUM_LEDS];
 CRGB listOfColors[14]; //List of predefined colors
 
-int sequence = 1; // What sequence to start playing?
+int sequence = 3; // What sequence to start playing?
 int loopCounter = 0; // ALWAYS RESET TO 0 WHEN SEQUENCE CHANGES
 bool isStarted = true;
 int beginDelay = 200;
-int loopDelay = 100;
+int loopDelay = 10;
 int BRIGHTNESS = 210;
 
 void setup() {
@@ -25,16 +25,21 @@ void setup() {
   FastLED.setMaxPowerInVoltsAndMilliamps(5,60000);
   Serial.setTimeout(50);
   Serial.flush();
-  while ( Serial.available() ) Serial.read();
 }
 
 void loop() {
+  
   // put your main code here, to run repeatedly:
   EVERY_N_MILLIS_I(thisTimer,beginDelay) {
-    thisTimer.setPeriod(loopDelay);   
+      thisTimer.setPeriod(loopDelay); 
     SequenceSchedule();
     loopCounter += 1;
   }
+
+  // EVERY_N_MILLISECONDS(100) {
+ //   SequenceSchedule();
+//    loopCounter += 1;
+//  }
 
   int startChar = Serial.read();
   SerialRead(startChar);
@@ -50,25 +55,27 @@ void SequenceSchedule() {
     case 1:
       // SEQUENCE
       OscialateComplexSequenceWrapper(loopCounter);
-      if (loopCounter > 1000) {
+      if (loopCounter > 100) {
         nextSequence();
       }
       break;
     case 2:
       ColorWipeRainSequenceWrapper();
-      if (loopCounter > 1000) {
+      if (loopCounter > 10) {
         nextSequence();
       }
       break;
     case 3:
       MatrixWrapper(loopCounter);
-      if (loopCounter > 1000) {
+      loopDelay = 100;
+      if (loopCounter > 3) {
         nextSequence();
       }
       break;
     case 4:
       PacificaSequenceWrapper();
-      if (loopCounter > 1000) {
+      loopDelay = 200;
+      if (loopCounter > 10000) {
         nextSequence();
       }
       break;
@@ -176,4 +183,17 @@ void SetListOfColors(CRGB listOfColors[14]) {
   listOfColors[11] = CRGB(162, 58, 109);
   listOfColors[12] = CRGB(162, 179, 136);
   listOfColors[13] = CRGB(28, 58, 136);
+}
+
+
+
+uint16_t XY (uint8_t x, uint8_t y) {
+   Serial.println(x);
+  return (y * NUM_LEDS_PER_STRIP + x);
+}
+
+
+uint16_t XYs (int x, int y) {
+   Serial.println(x);
+  return (y * NUM_LEDS_PER_STRIP + x);
 }
