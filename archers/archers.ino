@@ -8,7 +8,7 @@
 struct CRGB leds[NUM_LEDS];
 CRGB listOfColors[14]; //List of predefined colors
 
-int sequence = 3; // What sequence to start playing?
+int sequence = 1; // What sequence to start playing?
 int loopCounter = 0; // ALWAYS RESET TO 0 WHEN SEQUENCE CHANGES
 bool isStarted = true;
 int beginDelay = 200;
@@ -79,12 +79,28 @@ void SequenceSchedule() {
         nextSequence();
       }
       break;
+    case 5:
+      LavaSequenceWrapper();
+      loopDelay = 200;
+      if (loopCounter > 1000) {
+        nextSequence();
+      }
+      break;
+    case 6:
+      FireballsWrapper();
+      loopDelay = 200;
+      if (loopCounter > 1000) {
+        nextSequence();
+      }
+      break;    
     default:
       sequence = 1;
       loopCounter = 0;
       break;
   }
 }
+
+//TODO : Top archs btoom archers SPIN opposite directions
 
 void nextSequence(){
     sequence += 1;

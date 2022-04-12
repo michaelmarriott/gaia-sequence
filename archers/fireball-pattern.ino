@@ -24,6 +24,7 @@ void FireballsWrapper(){
   }
 
   blur2d(leds, NUM_LEDS_PER_STRIP, NUM_STRIPS, 32 );
+  FastLED.show();
 }
 
 byte dist (uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)  {
