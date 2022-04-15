@@ -63,10 +63,10 @@ void OscialateComplexSequence(int middle, int minimun) {
  // delay(colorSpeed);
   
   for (int strip = 0; strip < NUM_STRIPS; strip++) {
-    Serial.print("middle");
-   Serial.print(middle);
-  Serial.print("down");
-   Serial.println(rdms[strip][1]);
+  //  Serial.print("middle");
+  // Serial.print(middle);
+ // Serial.print("down");
+ //  Serial.println(rdms[strip][1]);
     leds[(strip * NUM_LEDS_PER_STRIP) + (middle - rdms[strip][1])] = colorOC[strip];
     leds[(strip * NUM_LEDS_PER_STRIP) + (middle + rdms[strip][1])] = colorOC[strip];
   }

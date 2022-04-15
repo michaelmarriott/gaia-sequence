@@ -32,11 +32,8 @@ void ColorWipeRainSequence(CRGB color, bool allowReverse, uint8_t wait) {
   cwr_amountofaparts = Increment(cwr_amountofaparts, 5 * CWR_LENGTH_VARIABLE, 25 * CWR_LENGTH_VARIABLE, 6);
 
   for (int i = (0 - (cwr_trailMax)); i < NUM_LEDS_PER_STRIP + cwr_trailMax + (cwr_apart * cwr_amountofaparts); i++) {
-
     for (int strip = 0; strip < NUM_STRIPS; strip++) {
-
       for (int t = 0; t < cwr_trailMax; t++) {
-
         if (i - t > 0 && i - t < NUM_LEDS_PER_STRIP) {
           leds[(strip * NUM_LEDS_PER_STRIP) + abs(reverse - (i - t))] = color;
           leds[(strip * NUM_LEDS_PER_STRIP) + abs(reverse - (i - t))].fadeToBlackBy(t * (int)(256 / cwr_trailMax));
@@ -51,7 +48,7 @@ void ColorWipeRainSequence(CRGB color, bool allowReverse, uint8_t wait) {
       }
     }
     FastLED.show();
-    delay(colorWipeSpeed);
+    //delay(colorWipeSpeed);
     for (int strip = 0; strip < NUM_STRIPS; strip++) {
       for (int t = 0; t < cwr_trailMax; t++) {
         if (i - t > 0 && i - t < NUM_LEDS_PER_STRIP) {
@@ -65,7 +62,6 @@ void ColorWipeRainSequence(CRGB color, bool allowReverse, uint8_t wait) {
           }
         }
       }
-
     }
   }
 }

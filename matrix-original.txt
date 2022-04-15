@@ -1,0 +1,111 @@
+//Digital Rain implementation
+//fastled 16x16 matrix demo
+//Yaroslaw Turbin 24.08.2020
+//https://vk.com/ldirko
+//https://www.reddit.com/user/ldirko/
+
+#include "FastLED.h"
+
+// Matrix size
+#define NUM_LEDS_PER_STRIP 200
+#define NUM_STRIPS 8
+// LEDs pin
+#define DATA_PIN 3
+// LED brightness
+#define BRIGHTNESS 255
+#define NUM_LEDS NUM_LEDS_PER_STRIP * NUM_STRIPS
+// Define the array of leds
+int loopCounter = 1;
+CRGB leds[NUM_LEDS];
+byte matrix_rain[NUM_LEDS];
+int matrix_speed = 10;
+int matrix_hue = random8(0, 255);
+int matrix_sat =  random8(110, 220);
+CHSV matrix_color =  CHSV(matrix_hue, matrix_sat, BRIGHTNESS);
+
+void setup() {
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);
+ 
+}
+
+void loop() {
+  EVERY_N_MILLISECONDS(100) {
+   MatrixWrapper(loopCounter);
+   loopCounter++;
+  }
+} //loop
+
+void MatrixWrapper(int loopCounter){
+   if (loopCounter == 1) {
+    MatrixInit();
+   }
+   MatrixUpdate();
+   FastLED.show();
+   MatrixChange();
+}
+
+
+void MatrixChange () {
+  matrix_hue = Increment(matrix_hue, 0, 255, 1);
+  matrix_sat = Increment(matrix_sat, 100, 220, 1);
+  matrix_color =  CHSV(matrix_hue, matrix_sat, BRIGHTNESS);
+
+  int rand1 = random16 (NUM_LEDS);
+  int rand2 = random16 (NUM_LEDS);
+  if ((matrix_rain[rand1] == 1) && (matrix_rain[rand2] == 0) )   //simple get two random dot 1 and 0 and swap it,
+  {
+    matrix_rain[rand1] = 0;  //this will not change total number of dots
+    matrix_rain[rand2] = 1;
+  }
+} 
+
+void MatrixInit() {
+  //init array of dots. run once
+  for (int i = 0; i < NUM_LEDS; i++) {
+    if (random8(10) == 0) {
+      matrix_rain[i] = 1;  //random8(20) number of dots. decrease for more dots
+    }
+    else {
+      matrix_rain[i] = 0;
+    }
+  }
+} 
+
+void MatrixUpdate() {
+ for (byte i = 0; i < NUM_LEDS_PER_STRIP; i++) {
+    for (byte j = 0; j < NUM_STRIPS; j++) {
+      byte layer = matrix_rain[XY( ((i + matrix_speed + random8(2) + NUM_LEDS_PER_STRIP) % NUM_LEDS_PER_STRIP),j)];   //fake scroll based on shift coordinate
+      // random8(2) add glitchy look
+      if (layer) {
+        leds[XY((NUM_LEDS_PER_STRIP - 1) - i, (NUM_STRIPS - 1) - j)] = matrix_color;
+      }
+    }
+  }
+
+  matrix_speed ++;
+  fadeToBlackBy(leds, NUM_LEDS, 40);
+  blurRows(leds,  NUM_LEDS_PER_STRIP, NUM_STRIPS, 16);      //if you want
+} 
+
+uint16_t XY (uint8_t x, uint8_t y) {
+  return (y * NUM_LEDS_PER_STRIP + x);
+}
+
+
+CRGB RandomColor(uint8_t minR, uint8_t maxR, uint8_t minG, uint8_t maxG , uint8_t minB , uint8_t maxB) {
+  CRGB randomColor = CRGB(random8(minR, maxR), random8(minG, maxG), random8(minB, maxB));
+  return randomColor;
+}
+
+
+int Increment(int value, int minValue, int maxValue, int increaseBy) {
+  int result = value + increaseBy;
+  if (result > maxValue) {
+    return minValue;
+  }
+  if (result < minValue) {
+    return minValue;
+  }
+  return result;
+}

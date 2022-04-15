@@ -1,98 +1,158 @@
 #include "FastLED.h" // FastLED library.
-
 //GLOBAL VARIBALES
 #define NUM_LEDS_PER_STRIP 450
+#define NUM_LEDS_PER_STRIP_SPLIT 120
 #define NUM_STRIPS 8
 #define NUM_LEDS NUM_LEDS_PER_STRIP * NUM_STRIPS
-
+int ledPin = 13; // Set the pin to digital I/O 13
+String previousResult = "";
 struct CRGB leds[NUM_LEDS];
 CRGB listOfColors[14]; //List of predefined colors
 
-int sequence = 1; // What sequence to start playing?
+int sequence = 4; // What sequence to start playing?
 int loopCounter = 0; // ALWAYS RESET TO 0 WHEN SEQUENCE CHANGES
 bool isStarted = true;
 int beginDelay = 200;
 int loopDelay = 10;
-int BRIGHTNESS = 210;
+int loopDelayMulti = 10;
+int BRIGHTNESS = 255;
+bool debug = false;
+
+int ChangeColorNumber = 0;
 
 void setup() {
   delay(100);//Safe Gaurd
-   
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
   // put your setup code here, to run once:
   LEDS.addLeds<WS2811_PORTD, NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
   LEDS.setBrightness(BRIGHTNESS);
   SetListOfColors(listOfColors);
-  FastLED.setMaxPowerInVoltsAndMilliamps(5,60000);
+ // FastLED.setMaxPowerInVoltsAndMilliamps(5, 60000);
   Serial.setTimeout(50);
   Serial.flush();
+  writeTeensy();
 }
 
 void loop() {
-  
+
   // put your main code here, to run repeatedly:
-  EVERY_N_MILLIS_I(thisTimer,beginDelay) {
-      thisTimer.setPeriod(loopDelay); 
-    SequenceSchedule();
-    loopCounter += 1;
+   EVERY_N_MILLIS_I(thisTimer,beginDelay) {
+      thisTimer.setPeriod(loopDelay);
+      SequenceSchedule();
+     loopCounter += 1;
   }
+  if (Serial.available()) {
+    int startChar = Serial.read();
+    SerialRead(startChar);
+  }
+ /// EVERY_N_MILLISECONDS(100) {
+  //   SequenceSchedule();
+ //   loopCounter += 1;
+ // }
 
-  // EVERY_N_MILLISECONDS(100) {
- //   SequenceSchedule();
-//    loopCounter += 1;
-//  }
+}
 
-  int startChar = Serial.read();
-  SerialRead(startChar);
+
+// Listen to incoming commands to sync
+void SerialRead(int startChar) {
+  if (startChar == '{') {
+    String result = Serial.readStringUntil('}');
+
+    if (previousResult != result) {
+      previousResult = result;
+
+      //000 000 000
+      if (result.length() > 3) {
+        blink();
+        int nextSequence = (result.substring(0, 3).toInt());
+        int nextBrightness = (result.substring(4, 7).toInt());
+        int nextSpeed = (result.substring(8, 11).toInt());
+
+        if (nextSequence != sequence) {
+          loopCounter = 0;
+          sequence = nextSequence;
+        }
+        if (nextBrightness != 0) {
+          LEDS.setBrightness(nextBrightness);
+        }
+        if (nextSpeed != 0) {
+          loopDelayMulti = nextSpeed;
+        }
+       
+      }
+    }
+  } else if (startChar == '%') {
+    sequence += 1;
+    String result = Serial.readStringUntil('\n');
+  } else  if (startChar == '?') {
+    writeTeensy();
+    isStarted = true;
+  }
+}
+
+void writeTeensy() {
+  Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(',');
+  Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(','); Serial.print(0); Serial.write(','); Serial.print(0);
+  Serial.println();
+}
+
+void blink() {
+  digitalWrite(ledPin, HIGH); // turn the LED on
+  delay(100); // Wait 10 milliseconds for next reading
+  digitalWrite(ledPin, LOW); // otherwise turn it off
 }
 
 // Sequence schedule
 void SequenceSchedule() {
-  Serial.print("-sequence:");
-  Serial.print(sequence);
-  Serial.print("-loopCounter:");
-  Serial.println(loopCounter);
+  if (debug) {
+    //  Serial.print("-sequence:");
+    // Serial.print(sequence);
+    //  Serial.print("-loopCounter:");
+    //  Serial.println(loopCounter);
+  }
   switch (sequence) {
     case 1:
       // SEQUENCE
       OscialateComplexSequenceWrapper(loopCounter);
-      if (loopCounter > 100) {
+      if (loopCounter > 1000) {
         nextSequence();
       }
       break;
     case 2:
       ColorWipeRainSequenceWrapper();
-      if (loopCounter > 10) {
+      if (loopCounter > 2) {
         nextSequence();
       }
       break;
     case 3:
       MatrixWrapper(loopCounter);
-      loopDelay = 100;
-      if (loopCounter > 3) {
+      loopDelay = 10*loopDelayMulti;
+      if (loopCounter > 300) {
         nextSequence();
       }
       break;
     case 4:
       PacificaSequenceWrapper();
-      loopDelay = 200;
+      loopDelay = 20*loopDelayMulti;
       if (loopCounter > 10000) {
         nextSequence();
       }
       break;
     case 5:
       LavaSequenceWrapper();
-      loopDelay = 200;
+      loopDelay = 20*loopDelayMulti;
       if (loopCounter > 1000) {
         nextSequence();
       }
       break;
     case 6:
       FireballsWrapper();
-      loopDelay = 200;
+      loopDelay = 20*loopDelayMulti;
       if (loopCounter > 1000) {
         nextSequence();
       }
-      break;    
+      break;
     default:
       sequence = 1;
       loopCounter = 0;
@@ -102,45 +162,11 @@ void SequenceSchedule() {
 
 //TODO : Top archs btoom archers SPIN opposite directions
 
-void nextSequence(){
-    sequence += 1;
-    loopCounter = 0;
+void nextSequence() {
+  sequence += 1;
+  loopCounter = 0;
 }
 
-// Listen to incoming commands to sync
-void SerialRead(int startChar) {
-  if (startChar == '{') {
-    String result = Serial.readStringUntil('}');
-    char  nextCmnd = result.substring(0, 1)[0];
-    int cmndValue = (result.substring(1, 4)).toInt();
-    switch (nextCmnd) {
-      case 'S':
-        sequence = cmndValue;
-        break;
-      case 'B':
-        BRIGHTNESS = cmndValue;
-        LEDS.setBrightness(BRIGHTNESS);
-        break;
-      case 'D':
-        loopDelay = cmndValue;
-        break;
-      default:
-        break;
-    }
-
-  } else if (startChar == '%') {
-    sequence += 1;
-    String result = Serial.readStringUntil('\n');
-  } else  if (startChar == '?') {
-    Serial.print(0);
-    Serial.write(',');
-    Serial.print(0);
-    Serial.println();
-    isStarted = true;
-  }
-}
-
-int ChangeColorNumber = 0;
 
 
 CRGB RandomColor(uint8_t minR, uint8_t maxR, uint8_t minG, uint8_t maxG , uint8_t minB , uint8_t maxB) {
@@ -204,12 +230,10 @@ void SetListOfColors(CRGB listOfColors[14]) {
 
 
 uint16_t XY (uint8_t x, uint8_t y) {
-   Serial.println(x);
   return (y * NUM_LEDS_PER_STRIP + x);
 }
 
 
 uint16_t XYs (int x, int y) {
-   Serial.println(x);
   return (y * NUM_LEDS_PER_STRIP + x);
 }
