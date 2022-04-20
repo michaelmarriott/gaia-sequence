@@ -12,6 +12,7 @@ int cwr_delay = 20;
 void ColorWipeRainSequenceWrapper() {
   // Serial.println("ColorWipeRainWrapper");
   ColorWipeRainSequence(ChangeColor(), cwr_allowReverse, cwr_delay);
+  
 }
 
 
@@ -31,6 +32,8 @@ void ColorWipeRainSequence(CRGB color, bool allowReverse, uint8_t wait) {
   cwr_apart = Increment(cwr_apart, 6 * CWR_LENGTH_VARIABLE, 20 * CWR_LENGTH_VARIABLE, 4);
   cwr_amountofaparts = Increment(cwr_amountofaparts, 5 * CWR_LENGTH_VARIABLE, 25 * CWR_LENGTH_VARIABLE, 6);
 
+  
+
   for (int i = (0 - (cwr_trailMax)); i < NUM_LEDS_PER_STRIP + cwr_trailMax + (cwr_apart * cwr_amountofaparts); i++) {
     for (int strip = 0; strip < NUM_STRIPS; strip++) {
       for (int t = 0; t < cwr_trailMax; t++) {
@@ -47,21 +50,23 @@ void ColorWipeRainSequence(CRGB color, bool allowReverse, uint8_t wait) {
         }
       }
     }
-    FastLED.show();
-    //delay(colorWipeSpeed);
-    for (int strip = 0; strip < NUM_STRIPS; strip++) {
-      for (int t = 0; t < cwr_trailMax; t++) {
-        if (i - t > 0 && i - t < NUM_LEDS_PER_STRIP) {
-          leds[(strip * NUM_LEDS_PER_STRIP) + abs(reverse - (i - t))].fadeToBlackBy(210);
-        }
-        for (int a = 1; a < cwr_amountofaparts; a++) {
-          int icwr_apart = ((i - t) - (cwr_apart * a));
-          if (icwr_apart > 0 && (icwr_apart) < NUM_LEDS_PER_STRIP) {
-            leds[(strip * NUM_LEDS_PER_STRIP) + abs(reverse - 0)].fadeToBlackBy(250);
-            leds[(strip * NUM_LEDS_PER_STRIP) + abs(reverse - icwr_apart)].fadeToBlackBy(210);
-          }
+FastLED.show();
+for (int strip = 0; strip < NUM_STRIPS; strip++) {
+    for (int t = 0; t < cwr_trailMax; t++) {
+      if (cwr_i - t > 0 && cwr_i - t < NUM_LEDS_PER_STRIP) {
+        leds[(strip * NUM_LEDS_PER_STRIP) + abs(reverse - (cwr_i - t))].fadeToBlackBy(210);
+      }
+      for (int a = 1; a < cwr_amountofaparts; a++) {
+        int icwr_apart = ((cwr_i - t) - (cwr_apart * a));
+        if (icwr_apart > 0 && (icwr_apart) < NUM_LEDS_PER_STRIP) {
+          leds[(strip * NUM_LEDS_PER_STRIP) + abs(reverse - 0)].fadeToBlackBy(250);
+          leds[(strip * NUM_LEDS_PER_STRIP) + abs(reverse - cwr_apart)].fadeToBlackBy(210);
         }
       }
     }
+  }
+  
+    //delay(colorWipeSpeed);
+
   }
 }

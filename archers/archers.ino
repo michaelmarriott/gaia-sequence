@@ -8,15 +8,17 @@ int ledPin = 13; // Set the pin to digital I/O 13
 String previousResult = "";
 struct CRGB leds[NUM_LEDS];
 CRGB listOfColors[14]; //List of predefined colors
+CRGBPalette16 currentPalette;
 
-int sequence = 4; // What sequence to start playing?
+int sequence = 10; // What sequence to start playing?
 int loopCounter = 0; // ALWAYS RESET TO 0 WHEN SEQUENCE CHANGES
 bool isStarted = true;
 int beginDelay = 200;
 int loopDelay = 10;
 int loopDelayMulti = 10;
 int BRIGHTNESS = 255;
-bool debug = false;
+bool debug = true;
+uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 int ChangeColorNumber = 0;
 
@@ -36,12 +38,18 @@ void setup() {
 
 void loop() {
 
-  // put your main code here, to run repeatedly:
+  // run next sequence every
+   EVERY_N_SECONDS( 10 ) { nextSequence(); } 
+   EVERY_N_MILLISECONDS( 20 ) { gHue++; } 
+   
    EVERY_N_MILLIS_I(thisTimer,beginDelay) {
       thisTimer.setPeriod(loopDelay);
       SequenceSchedule();
      loopCounter += 1;
-  }
+   }
+
+   
+   
   if (Serial.available()) {
     int startChar = Serial.read();
     SerialRead(startChar);
@@ -103,56 +111,74 @@ void blink() {
   digitalWrite(ledPin, LOW); // otherwise turn it off
 }
 
+
 // Sequence schedule
 void SequenceSchedule() {
   if (debug) {
-    //  Serial.print("-sequence:");
-    // Serial.print(sequence);
-    //  Serial.print("-loopCounter:");
-    //  Serial.println(loopCounter);
+      Serial.print("-sequence:");
+     Serial.print(sequence);
+      Serial.print("-loopCounter:");
+      Serial.println(loopCounter);
   }
   switch (sequence) {
-    case 1:
+    case 2:
       // SEQUENCE
       OscialateComplexSequenceWrapper(loopCounter);
-      if (loopCounter > 1000) {
-        nextSequence();
-      }
+      loopDelay = loopDelayMulti;
       break;
-    case 2:
+    case 1:
       ColorWipeRainSequenceWrapper();
-      if (loopCounter > 2) {
-        nextSequence();
-      }
+      loopDelay = loopDelayMulti;
       break;
     case 3:
       MatrixWrapper(loopCounter);
       loopDelay = 10*loopDelayMulti;
-      if (loopCounter > 300) {
-        nextSequence();
-      }
       break;
     case 4:
       PacificaSequenceWrapper();
       loopDelay = 20*loopDelayMulti;
-      if (loopCounter > 10000) {
-        nextSequence();
-      }
       break;
     case 5:
       LavaSequenceWrapper();
       loopDelay = 20*loopDelayMulti;
-      if (loopCounter > 1000) {
-        nextSequence();
-      }
       break;
     case 6:
       FireballsWrapper();
       loopDelay = 20*loopDelayMulti;
-      if (loopCounter > 1000) {
-        nextSequence();
-      }
       break;
+    case 7:
+      BpmWrapper();
+      loopDelay = 2*loopDelayMulti;
+       break;
+    case 8:
+      JuggleWrapper();
+      loopDelay = 2*loopDelayMulti;
+       break;
+    case 9:
+      SinelonWrapper();
+      loopDelay = 10*loopDelayMulti;
+       break;
+    case 10:
+      ConfettiWrapper();
+      loopDelay = 2*loopDelayMulti;
+       break;
+    case 11:
+      SpinnerPatternWrapper();
+      loopDelay = 20*loopDelayMulti;
+      break;
+    case 12:
+      DoAllColorsSequenceWrapper();
+      loopDelay = 20*loopDelayMulti;
+      break;
+    case 13:
+      GlitchSequenceWrapper();
+      loopDelay = 20*loopDelayMulti;
+      break;
+    case 99:
+       LEDS.setBrightness(50);
+        PacificaSequenceWrapper();
+        loopDelay = 20*loopDelayMulti;
+         break;
     default:
       sequence = 1;
       loopCounter = 0;
@@ -163,8 +189,12 @@ void SequenceSchedule() {
 //TODO : Top archs btoom archers SPIN opposite directions
 
 void nextSequence() {
-  sequence += 1;
-  loopCounter = 0;
+  if(sequence != 99) {
+    sequence += 1;
+    loopCounter = 0;
+  }else{
+    loopCounter = 0;
+  }
 }
 
 
@@ -202,6 +232,10 @@ CRGB Wheel(byte WheelPos) {
   }
 }
 
+CRGB RandomColor(){
+  return CRGB(random8(), random8(), random8());
+}
+
 CRGB ChangeColor() {
   ChangeColorNumber = ChangeColorNumber + 1;
   if (ChangeColorNumber > 13) {
@@ -236,4 +270,18 @@ uint16_t XY (uint8_t x, uint8_t y) {
 
 uint16_t XYs (int x, int y) {
   return (y * NUM_LEDS_PER_STRIP + x);
+}
+
+void SetColorPalatte(int pattern){
+  switch (pattern) //more info here: https://github.com/FastLED/FastLED/blob/master/colorpalettes.cpp
+  {
+  case 0:   currentPalette = LavaColors_p;          break;  // orange, red, black and yellow), 
+  case 1:   currentPalette = CloudColors_p;         break;  // blue and white
+  case 2:   currentPalette = OceanColors_p;         break;  // blue, cyan and white
+  case 3:   currentPalette = ForestColors_p;        break;  // greens and blues
+  case 4:   currentPalette = RainbowColors_p;       break;  // standard rainbow animation
+  case 5:   currentPalette = RainbowStripeColors_p; break;  // single colour, black space, next colour and so forth
+  case 6:   currentPalette = PartyColors_p;         break;  // red, yellow, orange, purple and blue
+  case 7:   currentPalette = HeatColors_p;          break;  // red, orange, yellow and white
+  }
 }
