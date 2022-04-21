@@ -3,14 +3,14 @@ int spin_bottom = 0;
 CRGB spin_top_colour = RandomColor(40, 140, 40, 140, 40, 240);
 CRGB spin_bottom_colour = RandomColor(40, 250, 40, 140, 40, 140);
 
-int r1 = spin_top_colour.r / 1.2;
-int g1 = spin_top_colour.g / 1.2;
-int b1 = spin_top_colour.b / 1.2;
+int r1 = spin_top_colour.r / 4;
+int g1 = spin_top_colour.g / 4;
+int b1 = spin_top_colour.b / 4;
 CRGB spin_top_colour_fade = CRGB(r1, g1, b1);
 
-int r2 = spin_bottom_colour.r / 1.2;
-int g2 = spin_bottom_colour.g / 1.2;
-int b2 = spin_bottom_colour.b / 1.2;
+int r2 = spin_bottom_colour.r / 4;
+int g2 = spin_bottom_colour.g / 4;
+int b2 = spin_bottom_colour.b / 4;
 CRGB spin_bottom_colour_fade  = CRGB(r2, g2, b2);
 
 void SpinnerPatternWrapper() {

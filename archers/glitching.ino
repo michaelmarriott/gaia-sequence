@@ -38,7 +38,7 @@ void doArrayGlitchSeqence(int* randomArr, int sizeOf) {
   for (int a = 0; a < loops; a++) {
     for (int y = 0; y < NUM_STRIPS; y++) {
       for (int x = 0; x < sizeOf; x++) {
-        Serial.println((y * NUM_STRIPS) + randomArr[x]);
+       // Serial.println((y * NUM_STRIPS) + randomArr[x]);
         leds[(y * NUM_LEDS_PER_STRIP) + randomArr[x]] = color;
       }
     }

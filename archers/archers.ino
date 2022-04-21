@@ -10,7 +10,7 @@ struct CRGB leds[NUM_LEDS];
 CRGB listOfColors[14]; //List of predefined colors
 CRGBPalette16 currentPalette;
 
-int sequence = 10; // What sequence to start playing?
+int sequence = 11; // What sequence to start playing?
 int loopCounter = 0; // ALWAYS RESET TO 0 WHEN SEQUENCE CHANGES
 bool isStarted = true;
 int beginDelay = 200;
@@ -39,13 +39,13 @@ void setup() {
 void loop() {
 
   // run next sequence every
-   EVERY_N_SECONDS( 10 ) { nextSequence(); } 
+   EVERY_N_SECONDS( 20 ) { nextSequence(); } 
    EVERY_N_MILLISECONDS( 20 ) { gHue++; } 
    
    EVERY_N_MILLIS_I(thisTimer,beginDelay) {
       thisTimer.setPeriod(loopDelay);
       SequenceSchedule();
-     loopCounter += 1;
+      loopCounter += 1;
    }
 
    
