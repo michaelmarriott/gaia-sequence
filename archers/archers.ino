@@ -1,6 +1,6 @@
 #include "FastLED.h" // FastLED library.
 //GLOBAL VARIBALES
-#define NUM_LEDS_PER_STRIP 450
+#define NUM_LEDS_PER_STRIP 500
 #define NUM_LEDS_PER_STRIP_SPLIT 120
 #define NUM_STRIPS 8
 #define NUM_LEDS NUM_LEDS_PER_STRIP * NUM_STRIPS
@@ -10,7 +10,7 @@ struct CRGB leds[NUM_LEDS];
 CRGB listOfColors[14]; //List of predefined colors
 CRGBPalette16 currentPalette;
 
-int sequence = 11; // What sequence to start playing?
+int sequence = 3; // What sequence to start playing?
 int loopCounter = 0; // ALWAYS RESET TO 0 WHEN SEQUENCE CHANGES
 bool isStarted = true;
 int beginDelay = 200;
@@ -27,7 +27,7 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   Serial.begin(9600);
   // put your setup code here, to run once:
-  LEDS.addLeds<WS2811_PORTD, NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
+  LEDS.addLeds<WS2811, NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
   LEDS.setBrightness(BRIGHTNESS);
   SetListOfColors(listOfColors);
  // FastLED.setMaxPowerInVoltsAndMilliamps(5, 60000);
@@ -50,10 +50,10 @@ void loop() {
 
    
    
-  if (Serial.available()) {
-    int startChar = Serial.read();
-    SerialRead(startChar);
-  }
+  //if (Serial.available()) {
+ //   int startChar = Serial.read();
+  ////  SerialRead(startChar);
+ // }
  /// EVERY_N_MILLISECONDS(100) {
   //   SequenceSchedule();
  //   loopCounter += 1;
@@ -168,7 +168,7 @@ void SequenceSchedule() {
       break;
     case 12:
       DoAllColorsSequenceWrapper();
-      loopDelay = 20*loopDelayMulti;
+      loopDelay = 2*loopDelayMulti;
       break;
     case 13:
       GlitchSequenceWrapper();
